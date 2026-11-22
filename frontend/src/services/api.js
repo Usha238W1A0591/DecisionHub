@@ -1,8 +1,12 @@
 import axios from 'axios';
 
-const API = axios.create({ 
-  baseURL: process.env.REACT_APP_API_URL || 'https://faithful-prosperity-production.up.railway.app/api'
-});
+// Normalize the base URL so it always ends with "/api".
+// All backend controllers are mounted under /api/*, and the env var
+// (from Vercel or .env.production) may or may not include the suffix.
+const rawApiUrl = (process.env.REACT_APP_API_URL || 'https://faithful-prosperity-production.up.railway.app/api').replace(/\/+$/, '');
+const baseURL = rawApiUrl.endsWith('/api') ? rawApiUrl : `${rawApiUrl}/api`;
+
+const API = axios.create({ baseURL });
 
 API.interceptors.request.use(config => {
   const token = localStorage.getItem('token');
