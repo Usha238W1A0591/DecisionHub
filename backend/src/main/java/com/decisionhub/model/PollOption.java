@@ -1,5 +1,6 @@
 package com.decisionhub.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,6 +19,7 @@ public class PollOption {
     @Column(nullable = false)
     private String optionText;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "poll_id")
     private Poll poll;
