@@ -8,6 +8,7 @@ export default function CreatePoll() {
   const [options, setOptions] = useState(['', '']);
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState('');
+  const [isError, setIsError] = useState(false);
 
   const s = {
     h1: { fontSize: 26, fontWeight: 700, color: '#e2e8f0', marginBottom: 8 },
@@ -22,17 +23,25 @@ export default function CreatePoll() {
     removeBtn: { background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#f87171', padding: '0 12px', borderRadius: 8, cursor: 'pointer', fontSize: 18 },
     addBtn: { background: 'transparent', border: '1px dashed #3f3f5e', color: '#6366f1', padding: '10px', borderRadius: 8, width: '100%', cursor: 'pointer', marginBottom: 20, fontSize: 14 },
     submitBtn: { background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', color: 'white', border: 'none', padding: '13px 28px', borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: 'pointer' },
-    msg: { color: '#6ee7b7', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', padding: '10px 16px', borderRadius: 8, marginBottom: 20, fontSize: 14 },
+    msgSuccess: { color: '#6ee7b7', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', padding: '10px 16px', borderRadius: 8, marginBottom: 20, fontSize: 14 },
+    msgError:   { color: '#f87171', background: 'rgba(239,68,68,0.1)',  border: '1px solid rgba(239,68,68,0.3)',  padding: '10px 16px', borderRadius: 8, marginBottom: 20, fontSize: 14 },
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setMsg('');
+    setIsError(false);
     try {
       await pollAPI.create({ ...form, options: options.filter(o => o.trim()) });
+      setIsError(false);
       setMsg('Poll created successfully!');
       setTimeout(() => navigate('/app/polls'), 1500);
-    } catch { setMsg('Failed to create poll'); }
+    } catch (err) {
+      setIsError(true);
+      const serverMsg = err.response?.data?.message || err.response?.data || err.message;
+      setMsg('Failed to create poll' + (serverMsg ? ': ' + serverMsg : ''));
+    }
     finally { setLoading(false); }
   };
 
@@ -41,7 +50,7 @@ export default function CreatePoll() {
       <h1 style={s.h1}>➕ Create Team Poll</h1>
       <p style={s.sub}>Setup real-time voting options for your squad</p>
       <div style={s.card}>
-        {msg && <div style={s.msg}>{msg}</div>}
+        {msg && <div style={isError ? s.msgError : s.msgSuccess}>{msg}</div>}
         <form onSubmit={handleSubmit}>
           <label style={s.label}>Poll Title</label>
           <input style={s.input} placeholder="e.g. Q4 Tech Stack Decision" value={form.title} onChange={e => setForm({...form, title: e.target.value})} required />
