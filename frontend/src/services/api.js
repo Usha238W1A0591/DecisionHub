@@ -14,6 +14,19 @@ API.interceptors.request.use(config => {
   return config;
 });
 
+// Auto-logout on 401 or 403 — clears stale tokens and sends user to login
+API.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
 export const authAPI = {
   login: (data) => API.post('/auth/login', data),
   register: (data) => API.post('/auth/register', data),
