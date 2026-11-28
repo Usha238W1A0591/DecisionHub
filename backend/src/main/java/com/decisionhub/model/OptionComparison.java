@@ -1,5 +1,6 @@
 package com.decisionhub.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -35,6 +36,7 @@ public class OptionComparison {
     private String optionBCost;
     private String optionBRisk;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "creator_id")
     private User creator;
